@@ -42,6 +42,22 @@ All colors MUST be HSL.
     --hotel-luxury: 280 70% 50%;
     --hotel-comfort: 200 95% 45%;
     --hotel-warmth: 25 95% 53%;
+    
+    /* Gradients for enhanced UI */
+    --gradient-luxury: linear-gradient(135deg, hsl(var(--hotel-luxury)), hsl(var(--primary)));
+    --gradient-comfort: linear-gradient(135deg, hsl(var(--hotel-comfort)), hsl(var(--secondary)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--hotel-luxury) / 0.8));
+    
+    /* Shadows */
+    --shadow-luxury: 0 20px 40px -12px hsl(var(--hotel-luxury) / 0.25);
+    --shadow-comfort: 0 10px 30px -10px hsl(var(--hotel-comfort) / 0.3);
+    --shadow-card: 0 4px 20px -4px hsl(var(--foreground) / 0.1);
+    
+    /* Success and info colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
 
     --sidebar-background: 0 0% 98%;
 
