@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Phone, Star, Wifi, Car, Utensils, Waves, Heart, Share2, Eye } from 'lucide-react';
 import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
 interface Hotel {
@@ -34,20 +33,10 @@ const amenityIcons: Record<string, any> = {
 };
 
 export const HotelCard = ({ hotel }: HotelCardProps) => {
-  const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   const handleBooking = () => {
-    if (!user) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to book this hotel.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     toast({
       title: "Booking initiated",
       description: `Booking process for ${hotel.name} will be available soon!`,
