@@ -14,36 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      audit_logs: {
+      blog_posts: {
         Row: {
-          action: string
+          author_id: string
+          content: string
           created_at: string
+          excerpt: string | null
+          featured_image_url: string | null
           id: string
-          new_data: Json | null
-          old_data: Json | null
-          record_id: string | null
-          table_name: string
-          user_id: string | null
+          meta_description: string | null
+          meta_keywords: string[] | null
+          published_at: string | null
+          slug: string
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
         }
         Insert: {
-          action: string
+          author_id: string
+          content: string
           created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
           id?: string
-          new_data?: Json | null
-          old_data?: Json | null
-          record_id?: string | null
-          table_name: string
-          user_id?: string | null
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          published_at?: string | null
+          slug: string
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
         }
         Update: {
-          action?: string
+          author_id?: string
+          content?: string
           created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
           id?: string
-          new_data?: Json | null
-          old_data?: Json | null
-          record_id?: string | null
-          table_name?: string
-          user_id?: string | null
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          published_at?: string | null
+          slug?: string
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -56,6 +74,7 @@ export type Database = {
           message: string
           name: string
           status: string | null
+          updated_at: string
         }
         Insert: {
           company?: string | null
@@ -65,6 +84,7 @@ export type Database = {
           message: string
           name: string
           status?: string | null
+          updated_at?: string
         }
         Update: {
           company?: string | null
@@ -74,128 +94,215 @@ export type Database = {
           message?: string
           name?: string
           status?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
-      notifications: {
+      faqs: {
         Row: {
+          answer: string
+          category: string | null
           created_at: string
           id: string
-          is_read: boolean | null
-          message: string
-          title: string
-          type: string | null
-          user_id: string
+          order_index: number | null
+          question: string
+          status: string | null
+          updated_at: string
         }
         Insert: {
+          answer: string
+          category?: string | null
           created_at?: string
           id?: string
-          is_read?: boolean | null
-          message: string
-          title: string
-          type?: string | null
-          user_id: string
+          order_index?: number | null
+          question: string
+          status?: string | null
+          updated_at?: string
         }
         Update: {
+          answer?: string
+          category?: string | null
           created_at?: string
           id?: string
-          is_read?: boolean | null
-          message?: string
-          title?: string
-          type?: string | null
-          user_id?: string
+          order_index?: number | null
+          question?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hotels: {
+        Row: {
+          address: string
+          amenities: string[] | null
+          city: string
+          country: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          email: string | null
+          id: string
+          image_urls: string[] | null
+          is_active: boolean | null
+          latitude: number | null
+          longitude: number | null
+          name: string
+          phone: string | null
+          postal_code: string | null
+          price_per_night: number | null
+          star_rating: number | null
+          state: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address: string
+          amenities?: string[] | null
+          city: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          phone?: string | null
+          postal_code?: string | null
+          price_per_night?: number | null
+          star_rating?: number | null
+          state: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string
+          amenities?: string[] | null
+          city?: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          phone?: string | null
+          postal_code?: string | null
+          price_per_night?: number | null
+          star_rating?: number | null
+          state?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotels_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      newsletter_subscriptions: {
+        Row: {
+          email: string
+          id: string
+          status: string | null
+          subscribed_at: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          status?: string | null
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          status?: string | null
+          subscribed_at?: string
+          unsubscribed_at?: string | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
-          avatar_url: string | null
-          bio: string | null
           created_at: string
+          email: string | null
           full_name: string | null
-          github_url: string | null
           id: string
-          is_verified: boolean | null
-          last_login: string | null
-          linkedin_url: string | null
-          location: string | null
-          role: string | null
+          is_admin: boolean | null
           updated_at: string
           user_id: string
-          username: string | null
-          website: string | null
         }
         Insert: {
-          avatar_url?: string | null
-          bio?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
-          github_url?: string | null
           id?: string
-          is_verified?: boolean | null
-          last_login?: string | null
-          linkedin_url?: string | null
-          location?: string | null
-          role?: string | null
+          is_admin?: boolean | null
           updated_at?: string
           user_id: string
-          username?: string | null
-          website?: string | null
         }
         Update: {
-          avatar_url?: string | null
-          bio?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
-          github_url?: string | null
           id?: string
-          is_verified?: boolean | null
-          last_login?: string | null
-          linkedin_url?: string | null
-          location?: string | null
-          role?: string | null
+          is_admin?: boolean | null
           updated_at?: string
           user_id?: string
-          username?: string | null
-          website?: string | null
         }
         Relationships: []
       }
-      team_members: {
+      testimonials: {
         Row: {
           avatar_url: string | null
-          bio: string | null
+          company: string | null
+          content: string
           created_at: string
+          featured: boolean | null
           id: string
-          is_active: boolean | null
-          linkedin_url: string | null
           name: string
-          order_index: number | null
-          position: string
+          position: string | null
+          rating: number | null
+          status: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
-          bio?: string | null
+          company?: string | null
+          content: string
           created_at?: string
+          featured?: boolean | null
           id?: string
-          is_active?: boolean | null
-          linkedin_url?: string | null
           name: string
-          order_index?: number | null
-          position: string
+          position?: string | null
+          rating?: number | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
-          bio?: string | null
+          company?: string | null
+          content?: string
           created_at?: string
+          featured?: boolean | null
           id?: string
-          is_active?: boolean | null
-          linkedin_url?: string | null
           name?: string
-          order_index?: number | null
-          position?: string
+          position?: string | null
+          rating?: number | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []
