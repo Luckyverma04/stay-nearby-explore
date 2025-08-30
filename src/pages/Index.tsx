@@ -84,13 +84,13 @@ const Index = () => {
         // Apply sorting
         switch (filters.sortBy) {
           case 'price_low':
-            query = query.order('price_per_night', { ascending: true, nullsLast: true });
+            query = query.order('price_per_night', { ascending: true, nullsFirst: false });
             break;
           case 'price_high':
-            query = query.order('price_per_night', { ascending: false, nullsLast: true });
+            query = query.order('price_per_night', { ascending: false, nullsFirst: false });
             break;
           case 'rating':
-            query = query.order('star_rating', { ascending: false, nullsLast: true });
+            query = query.order('star_rating', { ascending: false, nullsFirst: false });
             break;
           case 'city':
             query = query.order('city', { ascending: true });
