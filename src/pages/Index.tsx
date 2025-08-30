@@ -56,7 +56,7 @@ const Index = () => {
         if (filters.searchTerm) {
           query = query.or(`name.ilike.%${filters.searchTerm}%,city.ilike.%${filters.searchTerm}%,address.ilike.%${filters.searchTerm}%,description.ilike.%${filters.searchTerm}%`);
         }
-        if (filters.city) {
+        if (filters.city && filters.city !== 'all') {
           query = query.eq('city', filters.city);
         }
         if (filters.starRating) {
