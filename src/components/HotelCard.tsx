@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Phone, Star, Wifi, Car, Utensils, Waves, Heart, Share2, Eye } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { BookingModal } from './BookingModal';
 
 interface Hotel {
   id: string;
@@ -35,12 +36,10 @@ const amenityIcons: Record<string, any> = {
 export const HotelCard = ({ hotel }: HotelCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   const handleBooking = () => {
-    toast({
-      title: "Booking initiated",
-      description: `Booking process for ${hotel.name} will be available soon!`,
-    });
+    setShowBookingModal(true);
   };
 
   const handleLike = () => {
@@ -192,6 +191,12 @@ export const HotelCard = ({ hotel }: HotelCardProps) => {
           </div>
         </div>
       </CardFooter>
+
+      <BookingModal 
+        hotel={hotel}
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+      />
     </Card>
   );
 };
