@@ -61,6 +61,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				'hotel-luxury': 'hsl(var(--hotel-luxury))',
+				'hotel-comfort': 'hsl(var(--hotel-comfort))',
+				'hotel-warmth': 'hsl(var(--hotel-warmth))',
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				info: {
+					DEFAULT: 'hsl(var(--info))',
+					foreground: 'hsl(var(--info-foreground))'
 				}
 			},
 			borderRadius: {

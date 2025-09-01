@@ -53,9 +53,11 @@ export const Navbar = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <User className="h-4 w-4 mr-2" />
-                  Profile
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard">
+                    <User className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Link>
                 </DropdownMenuItem>
                 {profile?.is_admin && (
                   <>
