@@ -20,13 +20,14 @@ serve(async (req) => {
         auth: {
           autoRefreshToken: false,
           persistSession: false
-        }
+        },
+        global: {
+          headers: {
+            Authorization: req.headers.get('Authorization')!,
+          },
+        },
       }
     )
-
-    // Get the authorization header from the request
-    const authHeader = req.headers.get('Authorization')!
-    supabase.auth.setAuth(authHeader?.replace('Bearer ', '') ?? '')
 
     const { 
       hotelId, 
