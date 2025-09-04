@@ -376,6 +376,60 @@ export type Database = {
         }
         Relationships: []
       }
+      group_bookings: {
+        Row: {
+          admin_notes: string | null
+          booking_type: string
+          check_in_date: string
+          check_out_date: string
+          created_at: string
+          estimated_budget: number | null
+          group_name: string
+          group_size: number
+          hotel_id: string
+          id: string
+          organizer_id: string
+          rooms_required: number
+          special_requirements: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          booking_type: string
+          check_in_date: string
+          check_out_date: string
+          created_at?: string
+          estimated_budget?: number | null
+          group_name: string
+          group_size: number
+          hotel_id: string
+          id?: string
+          organizer_id: string
+          rooms_required: number
+          special_requirements?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          booking_type?: string
+          check_in_date?: string
+          check_out_date?: string
+          created_at?: string
+          estimated_budget?: number | null
+          group_name?: string
+          group_size?: number
+          hotel_id?: string
+          id?: string
+          organizer_id?: string
+          rooms_required?: number
+          special_requirements?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hotel_amenities: {
         Row: {
           additional_cost: number | null
@@ -541,6 +595,120 @@ export type Database = {
           },
         ]
       }
+      local_services: {
+        Row: {
+          contact_info: Json | null
+          created_at: string
+          description: string | null
+          distance_from_hotel: number | null
+          hotel_id: string
+          id: string
+          is_partner: boolean
+          pricing_info: Json | null
+          rating: number | null
+          service_name: string
+          service_type: string
+          updated_at: string
+        }
+        Insert: {
+          contact_info?: Json | null
+          created_at?: string
+          description?: string | null
+          distance_from_hotel?: number | null
+          hotel_id: string
+          id?: string
+          is_partner?: boolean
+          pricing_info?: Json | null
+          rating?: number | null
+          service_name: string
+          service_type: string
+          updated_at?: string
+        }
+        Update: {
+          contact_info?: Json | null
+          created_at?: string
+          description?: string | null
+          distance_from_hotel?: number | null
+          hotel_id?: string
+          id?: string
+          is_partner?: boolean
+          pricing_info?: Json | null
+          rating?: number | null
+          service_name?: string
+          service_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      loyalty_points: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          description: string
+          id: string
+          points: number
+          points_type: string
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          points?: number
+          points_type: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          points?: number
+          points_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          attachment_url: string | null
+          booking_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          message_type: string
+          sender_id: string
+          sender_type: string
+          updated_at: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          booking_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          message_type?: string
+          sender_id: string
+          sender_type: string
+          updated_at?: string
+        }
+        Update: {
+          attachment_url?: string | null
+          booking_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          message_type?: string
+          sender_id?: string
+          sender_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newsletter_subscriptions: {
         Row: {
           email: string
@@ -672,6 +840,42 @@ export type Database = {
         }
         Relationships: []
       }
+      push_notifications: {
+        Row: {
+          body: string
+          created_at: string
+          data: Json | null
+          id: string
+          scheduled_for: string | null
+          sent_at: string | null
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           booking_id: string | null
@@ -777,6 +981,39 @@ export type Database = {
           rating?: number | null
           status?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_loyalty_summary: {
+        Row: {
+          created_at: string
+          id: string
+          tier_level: string
+          total_bookings: number
+          total_points: number
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tier_level?: string
+          total_bookings?: number
+          total_points?: number
+          total_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tier_level?: string
+          total_bookings?: number
+          total_points?: number
+          total_spent?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
