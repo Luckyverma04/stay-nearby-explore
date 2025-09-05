@@ -1,1 +1,43 @@
 project_id = "xfvmuyjujrpvyxummcts"
+
+[functions.process-payment]
+verify_jwt = true
+
+[functions.create-booking]
+verify_jwt = true
+
+[functions.booking-management]
+verify_jwt = true
+
+[functions.availability-checker]
+verify_jwt = false
+
+[functions.booking-reminders]
+verify_jwt = false
+
+[functions.advanced-search]
+verify_jwt = false
+
+[functions.analytics-dashboard]
+verify_jwt = true
+
+[functions.send-email-notification]
+verify_jwt = false
+
+[functions.realtime-messaging]
+verify_jwt = true
+
+[functions.loyalty-system]
+verify_jwt = true
+
+[functions.group-bookings]
+verify_jwt = true
+
+[functions.local-services]
+verify_jwt = false
+
+[functions.invoice-generator]
+verify_jwt = true
+
+[functions.refund-processor]
+verify_jwt = true
