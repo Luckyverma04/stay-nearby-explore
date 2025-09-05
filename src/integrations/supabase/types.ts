@@ -595,6 +595,54 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          currency: string
+          due_date: string
+          generated_at: string
+          id: string
+          invoice_data: Json
+          invoice_number: string
+          paid_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string
+          currency?: string
+          due_date: string
+          generated_at?: string
+          id?: string
+          invoice_data: Json
+          invoice_number: string
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          currency?: string
+          due_date?: string
+          generated_at?: string
+          id?: string
+          invoice_data?: Json
+          invoice_number?: string
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       local_services: {
         Row: {
           contact_info: Json | null
@@ -766,6 +814,48 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_analytics: {
+        Row: {
+          created_at: string
+          currency: string
+          date: string
+          failed_payments: number
+          id: string
+          payment_methods: Json
+          refunded_amount: number
+          successful_payments: number
+          total_revenue: number
+          total_transactions: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          date: string
+          failed_payments?: number
+          id?: string
+          payment_methods?: Json
+          refunded_amount?: number
+          successful_payments?: number
+          total_revenue?: number
+          total_transactions?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          date?: string
+          failed_payments?: number
+          id?: string
+          payment_methods?: Json
+          refunded_amount?: number
+          successful_payments?: number
+          total_revenue?: number
+          total_transactions?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_logs: {
         Row: {
           amount: number
@@ -872,6 +962,54 @@ export type Database = {
           sent_at?: string | null
           status?: string
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      refunds: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          payment_log_id: string | null
+          processed_at: string | null
+          processed_by: string | null
+          refund_amount: number
+          refund_reason: string
+          refund_reference: string | null
+          requested_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          payment_log_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          refund_amount: number
+          refund_reason: string
+          refund_reference?: string | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          payment_log_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          refund_amount?: number
+          refund_reason?: string
+          refund_reference?: string | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1017,6 +1155,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_payment_methods: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          masked_details: Json
+          payment_type: string
+          provider: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          masked_details: Json
+          payment_type: string
+          provider: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          masked_details?: Json
+          payment_type?: string
+          provider?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           accessibility_needs: string[] | null
@@ -1087,6 +1261,10 @@ export type Database = {
           p_rooms?: number
         }
         Returns: boolean
+      }
+      generate_invoice_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       track_booking_event: {
         Args: {
