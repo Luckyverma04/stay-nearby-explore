@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Hotel, User, LogOut, Settings } from 'lucide-react';
+import { NotificationSystem } from './NotificationSystem';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +45,7 @@ export const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-2">
+          {user && <NotificationSystem />}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
