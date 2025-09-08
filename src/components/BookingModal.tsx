@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { PaymentButton } from './PaymentButton';
 
 interface Hotel {
   id: string;
@@ -38,6 +39,8 @@ export const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
   const [guestPhone, setGuestPhone] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   const calculateTotal = () => {
     if (!checkInDate || !checkOutDate || !hotel || !hotel.price_per_night) return 0;
@@ -86,13 +89,12 @@ export const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       if (data.success) {
         toast({
           title: "Booking created successfully!",
-          description: `Your booking reference is ${data.booking.booking_reference}`,
+          description: `Your booking reference is ${data.booking.booking_reference}. Proceed to payment.`,
         });
         
-        // Proceed to payment
-        handlePayment(data.booking.id, calculateTotal());
-        onClose();
-        resetForm();
+        // Set booking ID and show payment
+        setBookingId(data.booking.id);
+        setShowPayment(true);
       }
     } catch (error) {
       console.error('Booking error:', error);
@@ -106,38 +108,15 @@ export const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
     }
   };
 
-  const handlePayment = async (bookingId: string, amount: number) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('process-payment', {
-        body: {
-          bookingId,
-          paymentMethod: 'credit_card', // In real app, get from payment form
-          amount
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
-        toast({
-          title: "Payment successful!",
-          description: `Transaction ID: ${data.transactionId}`,
-        });
-      } else {
-        toast({
-          title: "Payment failed",
-          description: data.error || "Payment processing failed",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast({
-        title: "Payment error",
-        description: "There was an error processing your payment.",
-        variant: "destructive",
-      });
-    }
+  const handlePaymentComplete = () => {
+    toast({
+      title: "Booking Complete!",
+      description: "Your payment has been processed successfully.",
+    });
+    onClose();
+    resetForm();
+    setShowPayment(false);
+    setBookingId(null);
   };
 
   const resetForm = () => {
@@ -149,6 +128,8 @@ export const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
     setGuestEmail('');
     setGuestPhone('');
     setSpecialRequests('');
+    setBookingId(null);
+    setShowPayment(false);
   };
 
   if (!hotel) return null;
@@ -328,18 +309,44 @@ export const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
           )}
 
           {/* Action Buttons */}
-          <div className="flex space-x-3">
-            <Button variant="outline" onClick={onClose} className="flex-1">
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleBooking} 
-              disabled={isLoading || !checkInDate || !checkOutDate || !guestName || !guestEmail}
-              className="flex-1"
-            >
-              {isLoading ? 'Processing...' : `Book for ₹${calculateTotal().toLocaleString()}`}
-            </Button>
-          </div>
+          {!showPayment ? (
+            <div className="flex space-x-3">
+              <Button variant="outline" onClick={onClose} className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleBooking} 
+                disabled={isLoading || !checkInDate || !checkOutDate || !guestName || !guestEmail}
+                className="flex-1"
+              >
+                {isLoading ? 'Processing...' : `Create Booking - ₹${calculateTotal().toLocaleString()}`}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-2">
+                  Booking Created Successfully!
+                </h3>
+                <p className="text-green-700 dark:text-green-300 text-sm">
+                  Complete your payment to confirm your reservation.
+                </p>
+              </div>
+              
+              <div className="flex space-x-3">
+                <Button variant="outline" onClick={onClose} className="flex-1">
+                  Pay Later
+                </Button>
+                {bookingId && (
+                  <PaymentButton
+                    bookingId={bookingId}
+                    amount={calculateTotal()}
+                    className="flex-1"
+                  />
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

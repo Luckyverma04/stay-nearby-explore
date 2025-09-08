@@ -1,468 +1,220 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Star } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AdminBookingManagement from '@/components/AdminBookingManagement';
+import { 
+  Users, 
+  Calendar, 
+  CreditCard, 
+  Hotel,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  BarChart3
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
+
+interface AdminStats {
+  totalHotels: number;
+  totalBookings: number;
+  totalRevenue: number;
+  pendingBookings: number;
+  activeUsers: number;
+  recentActivity: any[];
+}
 
 export default function Admin() {
   const { profile, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const [hotels, setHotels] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingHotel, setEditingHotel] = useState<any>(null);
-
-  const [hotelForm, setHotelForm] = useState({
-    name: '',
-    description: '',
-    address: '',
-    city: '',
-    state: '',
-    country: 'India',
-    postal_code: '',
-    latitude: '',
-    longitude: '',
-    phone: '',
-    email: '',
-    website: '',
-    star_rating: '',
-    price_per_night: '',
-    amenities: '',
-    image_urls: '',
+  const [stats, setStats] = useState<AdminStats>({
+    totalHotels: 0,
+    totalBookings: 0,
+    totalRevenue: 0,
+    pendingBookings: 0,
+    activeUsers: 0,
+    recentActivity: []
   });
-
-  useEffect(() => {
-    if (!authLoading && (!profile || !profile.is_admin)) {
-      navigate('/');
-      toast({
-        title: "Access denied",
-        description: "You don't have admin privileges.",
-        variant: "destructive",
-      });
-    }
-  }, [profile, authLoading, navigate]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (profile?.is_admin) {
-      fetchHotels();
+      fetchAdminStats();
     }
   }, [profile]);
 
-  const fetchHotels = async () => {
+  const fetchAdminStats = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Fetch hotels count
+      const { count: hotelsCount } = await supabase
         .from('hotels')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*', { count: 'exact', head: true });
 
-      if (error) {
-        console.error('Error fetching hotels:', error);
-        toast({
-          title: "Error loading hotels",
-          description: "Unable to fetch hotels. Please try again.",
-          variant: "destructive",
-        });
-      } else {
-        setHotels(data || []);
-      }
+      // Fetch bookings stats
+      const { data: bookings, count: bookingsCount } = await supabase
+        .from('bookings')
+        .select('total_amount, booking_status, payment_status', { count: 'exact' });
+
+      // Fetch users count
+      const { count: usersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      const totalRevenue = bookings?.filter(b => b.payment_status === 'paid')
+        .reduce((sum, b) => sum + Number(b.total_amount), 0) || 0;
+
+      const pendingBookings = bookings?.filter(b => b.booking_status === 'pending').length || 0;
+
+      setStats({
+        totalHotels: hotelsCount || 0,
+        totalBookings: bookingsCount || 0,
+        totalRevenue,
+        pendingBookings,
+        activeUsers: usersCount || 0,
+        recentActivity: []
+      });
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching admin stats:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load admin statistics.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      const hotelData = {
-        ...hotelForm,
-        star_rating: hotelForm.star_rating ? parseInt(hotelForm.star_rating) : null,
-        price_per_night: hotelForm.price_per_night ? parseFloat(hotelForm.price_per_night) : null,
-        latitude: hotelForm.latitude ? parseFloat(hotelForm.latitude) : null,
-        longitude: hotelForm.longitude ? parseFloat(hotelForm.longitude) : null,
-        amenities: hotelForm.amenities ? hotelForm.amenities.split(',').map(a => a.trim()) : [],
-        image_urls: hotelForm.image_urls ? hotelForm.image_urls.split(',').map(u => u.trim()) : [],
-      };
-
-      let error;
-
-      if (editingHotel) {
-        const { error: updateError } = await supabase
-          .from('hotels')
-          .update(hotelData)
-          .eq('id', editingHotel.id);
-        error = updateError;
-      } else {
-        const { error: insertError } = await supabase
-          .from('hotels')
-          .insert([hotelData]);
-        error = insertError;
-      }
-
-      if (error) {
-        console.error('Error saving hotel:', error);
-        toast({
-          title: "Error saving hotel",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: editingHotel ? "Hotel updated" : "Hotel added",
-          description: `Hotel ${editingHotel ? 'updated' : 'added'} successfully.`,
-        });
-        setDialogOpen(false);
-        resetForm();
-        fetchHotels();
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const handleEdit = (hotel: any) => {
-    setEditingHotel(hotel);
-    setHotelForm({
-      name: hotel.name || '',
-      description: hotel.description || '',
-      address: hotel.address || '',
-      city: hotel.city || '',
-      state: hotel.state || '',
-      country: hotel.country || 'India',
-      postal_code: hotel.postal_code || '',
-      latitude: hotel.latitude?.toString() || '',
-      longitude: hotel.longitude?.toString() || '',
-      phone: hotel.phone || '',
-      email: hotel.email || '',
-      website: hotel.website || '',
-      star_rating: hotel.star_rating?.toString() || '',
-      price_per_night: hotel.price_per_night?.toString() || '',
-      amenities: hotel.amenities?.join(', ') || '',
-      image_urls: hotel.image_urls?.join(', ') || '',
-    });
-    setDialogOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this hotel?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('hotels')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting hotel:', error);
-        toast({
-          title: "Error deleting hotel",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Hotel deleted",
-          description: "Hotel deleted successfully.",
-        });
-        fetchHotels();
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const resetForm = () => {
-    setEditingHotel(null);
-    setHotelForm({
-      name: '',
-      description: '',
-      address: '',
-      city: '',
-      state: '',
-      country: 'India',
-      postal_code: '',
-      latitude: '',
-      longitude: '',
-      phone: '',
-      email: '',
-      website: '',
-      star_rating: '',
-      price_per_night: '',
-      amenities: '',
-      image_urls: '',
-    });
-  };
-
-  if (authLoading || !profile?.is_admin) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Loading...</h2>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold">Loading...</h2>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage hotels and bookings</p>
-        </div>
-        
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Hotel
+  if (!profile?.is_admin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-12 text-center">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
+            <p className="text-muted-foreground mb-4">
+              You don't have permission to access the admin panel.
+            </p>
+            <Button onClick={() => window.history.back()}>
+              Go Back
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingHotel ? 'Edit Hotel' : 'Add New Hotel'}</DialogTitle>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Hotel Name *</Label>
-                  <Input
-                    id="name"
-                    value={hotelForm.name}
-                    onChange={(e) => setHotelForm({ ...hotelForm, name: e.target.value })}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="star_rating">Star Rating</Label>
-                  <Input
-                    id="star_rating"
-                    type="number"
-                    min="1"
-                    max="5"
-                    value={hotelForm.star_rating}
-                    onChange={(e) => setHotelForm({ ...hotelForm, star_rating: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={hotelForm.description}
-                  onChange={(e) => setHotelForm({ ...hotelForm, description: e.target.value })}
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">Address *</Label>
-                <Input
-                  id="address"
-                  value={hotelForm.address}
-                  onChange={(e) => setHotelForm({ ...hotelForm, address: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city">City *</Label>
-                  <Input
-                    id="city"
-                    value={hotelForm.city}
-                    onChange={(e) => setHotelForm({ ...hotelForm, city: e.target.value })}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="state">State *</Label>
-                  <Input
-                    id="state"
-                    value={hotelForm.state}
-                    onChange={(e) => setHotelForm({ ...hotelForm, state: e.target.value })}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="postal_code">Postal Code</Label>
-                  <Input
-                    id="postal_code"
-                    value={hotelForm.postal_code}
-                    onChange={(e) => setHotelForm({ ...hotelForm, postal_code: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="latitude">Latitude</Label>
-                  <Input
-                    id="latitude"
-                    type="number"
-                    step="any"
-                    value={hotelForm.latitude}
-                    onChange={(e) => setHotelForm({ ...hotelForm, latitude: e.target.value })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="longitude">Longitude</Label>
-                  <Input
-                    id="longitude"
-                    type="number"
-                    step="any"
-                    value={hotelForm.longitude}
-                    onChange={(e) => setHotelForm({ ...hotelForm, longitude: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={hotelForm.phone}
-                    onChange={(e) => setHotelForm({ ...hotelForm, phone: e.target.value })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="price_per_night">Price per Night (₹)</Label>
-                  <Input
-                    id="price_per_night"
-                    type="number"
-                    step="0.01"
-                    value={hotelForm.price_per_night}
-                    onChange={(e) => setHotelForm({ ...hotelForm, price_per_night: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="amenities">Amenities (comma-separated)</Label>
-                <Input
-                  id="amenities"
-                  value={hotelForm.amenities}
-                  onChange={(e) => setHotelForm({ ...hotelForm, amenities: e.target.value })}
-                  placeholder="WiFi, Parking, Restaurant, Pool"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="image_urls">Image URLs (comma-separated)</Label>
-                <Textarea
-                  id="image_urls"
-                  value={hotelForm.image_urls}
-                  onChange={(e) => setHotelForm({ ...hotelForm, image_urls: e.target.value })}
-                  placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                  rows={2}
-                />
-              </div>
-
-              <div className="flex gap-2 pt-4">
-                <Button type="submit" className="flex-1">
-                  {editingHotel ? 'Update Hotel' : 'Add Hotel'}
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+          </CardContent>
+        </Card>
       </div>
+    );
+  }
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Hotels Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">
-              <p>Loading hotels...</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {hotels.map((hotel) => (
-                  <TableRow key={hotel.id}>
-                    <TableCell className="font-medium">{hotel.name}</TableCell>
-                    <TableCell>{hotel.city}, {hotel.state}</TableCell>
-                    <TableCell>
-                      {hotel.star_rating && (
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                          {hotel.star_rating}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {hotel.price_per_night && `₹${hotel.price_per_night.toLocaleString()}`}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={hotel.is_active ? "default" : "secondary"}>
-                        {hotel.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(hotel)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(hotel.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
+      <div className="container mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Manage your hotel booking platform</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className="bg-primary/10 text-primary">
+              Administrator
+            </Badge>
+          </div>
+        </div>
+
+        {/* Stats Overview */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            {[...Array(5)].map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-6">
+                  <div className="h-8 bg-muted rounded mb-2"></div>
+                  <div className="h-6 bg-muted rounded"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Hotels</p>
+                    <p className="text-2xl font-bold">{stats.totalHotels}</p>
+                  </div>
+                  <Hotel className="h-8 w-8 text-primary" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Bookings</p>
+                    <p className="text-2xl font-bold">{stats.totalBookings}</p>
+                  </div>
+                  <Calendar className="h-8 w-8 text-hotel-luxury" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                    <p className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString()}</p>
+                  </div>
+                  <CreditCard className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Pending Bookings</p>
+                    <p className="text-2xl font-bold">{stats.pendingBookings}</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-yellow-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Active Users</p>
+                    <p className="text-2xl font-bold">{stats.activeUsers}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-secondary" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Main Admin Content */}
+        <AdminBookingManagement />
+      </div>
     </div>
   );
 }
