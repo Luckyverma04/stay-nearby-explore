@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AdminBookingManagement from '@/components/AdminBookingManagement';
+import { HotelManagement } from '@/components/HotelManagement';
 import { 
   Users, 
   Calendar, 
@@ -213,7 +214,18 @@ export default function Admin() {
         )}
 
         {/* Main Admin Content */}
-        <AdminBookingManagement />
+        <Tabs defaultValue="bookings" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="hotels">Hotels</TabsTrigger>
+            <TabsTrigger value="bookings">Bookings</TabsTrigger>
+          </TabsList>
+          <TabsContent value="hotels" className="mt-6">
+            <HotelManagement />
+          </TabsContent>
+          <TabsContent value="bookings" className="mt-6">
+            <AdminBookingManagement />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
