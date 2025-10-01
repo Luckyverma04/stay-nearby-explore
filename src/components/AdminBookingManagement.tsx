@@ -156,7 +156,161 @@ const AdminBookingManagement = () => {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      {/* ... baaki ka code same rakho ... */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">₹{totalRevenue.toLocaleString()}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Pending Bookings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{pendingBookings}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Confirmed Bookings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{confirmedBookings}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Booking Management</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, email, reference, or hotel..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Booking Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Payment Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payments</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="refunded">Refunded</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Bookings Table */}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Reference</TableHead>
+                  <TableHead>Guest</TableHead>
+                  <TableHead>Hotel</TableHead>
+                  <TableHead>Dates</TableHead>
+                  <TableHead>Guests/Rooms</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Payment</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredBookings.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      No bookings found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredBookings.map((booking) => (
+                    <TableRow key={booking.id}>
+                      <TableCell className="font-medium">{booking.booking_reference}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{booking.guest_name}</p>
+                          <p className="text-sm text-muted-foreground">{booking.guest_email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{booking.hotels.name}</p>
+                          <p className="text-sm text-muted-foreground">{booking.hotels.city}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <p>In: {format(new Date(booking.check_in_date), 'PP')}</p>
+                          <p>Out: {format(new Date(booking.check_out_date), 'PP')}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <p>{booking.guests} guests</p>
+                          <p>{booking.rooms} rooms</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">₹{booking.total_amount.toLocaleString()}</TableCell>
+                      <TableCell>{getStatusBadge(booking.booking_status)}</TableCell>
+                      <TableCell>{getPaymentBadge(booking.payment_status)}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          {booking.booking_status === 'pending' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => updateBookingStatus(booking.id, 'confirmed')}
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {booking.booking_status !== 'cancelled' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
